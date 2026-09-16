@@ -18,9 +18,9 @@ text = font.render('Impster', True, (230,10,15))
 running = True
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             running = False
-
+            
     screen.fill((0, 0, 0))
     #render things
     screen.blit(text,(width/2-120,height/2-80))
@@ -29,7 +29,7 @@ while running:
 
 #game loop
 running = True
-slider = elements.slider(60,1,screen,pygame)
+slider = elements.slider(60,0.2,screen,pygame)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
