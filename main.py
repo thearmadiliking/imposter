@@ -1,6 +1,7 @@
 import pygame
 import elements
 import re
+
 pygame.init()
 
 width, height = 800, 600
@@ -32,8 +33,6 @@ def load_level(lvl_nmb):
         lines = file.readlines()
         for line in lines:
             pice_time = intyfi(r'time-(\d)',line)
-            efect = intyfi(r'efect-(\d)',line)
-            anim = intyfi(r'anim-(\d)',line)
             r = intyfi(r'r-(\d+)',line)
             g = intyfi(r'g-(\d+)',line)
             b = intyfi(r'b-(\d+)',line)
@@ -42,8 +41,25 @@ def load_level(lvl_nmb):
             e2 = stringyfi(r'e2-(\w)',line)
             e3 = stringyfi(r'e3-(\w)',line)
 
-            level.append([pice_time,efect,anim,r,g,b,dificalty,e1,e2,e3])
+            level.append([e1,e2,e3,r,g,b,dificalty,pice_time])
 load_level(1)
+
+dic = {"r":elements.rect}
+class player():
+    def __init__(self,line):
+        self.line = line
+        self.imposter = elements.random.randint(0,3)
+        self.e1 = dic[line[0]](1,(line[3],line[4],line[5]),line[6],self.imposter,pygame,screen)
+        self.e2 = dic[line[0]](2,(line[3],line[4],line[5]),line[6],self.imposter,pygame,screen)
+        self.e3 = dic[line[0]](3,(line[3],line[4],line[5]),line[6],self.imposter,pygame,screen)
+        self.slider = elements.slider(60,line[7],screen,pygame)
+
+
+    def update(self):
+        self.e1.update()
+        self.e2.update()
+        self.e3.update()
+        self.slider.update()
 
 
 #main menu loop
@@ -61,19 +77,14 @@ while running:
 
 #game loop
 running = True
-slider = elements.slider(60,1,screen,pygame)
-e1_test = elements.rect(1,(0,30,255),65,2,pygame,screen)
-e2_test = elements.rect(2,(0,30,255),65,2,pygame,screen)
-e3_test = elements.rect(3,(0,30,255),65,2,pygame,screen)
+line_nmb = 0
 
+pice = player(level[0])
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     screen.fill((0, 0, 0))
-    slider.update()
-    e1_test.update()
-    e2_test.update()
-    e3_test.update()
+    pice.update()
     pygame.display.flip()
