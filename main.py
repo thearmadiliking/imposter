@@ -1,6 +1,8 @@
 import pygame
 import elements
 import re
+import math
+import time
 
 pygame.init()
 
@@ -14,7 +16,8 @@ font = pygame.font.SysFont(
     bold=True,
     italic=True
 )
-text = font.render('Impster', True, (230,10,15))
+text = pygame.image.load("imposter.png")
+text = pygame.transform.scale(text, (400, 80))
 
 def intyfi(not_int,line):
     return int(str(re.findall(not_int,line)[0]))
@@ -31,8 +34,9 @@ def floatyfi(pattern, line):
 
 
 #level player
-level = []
+level_nmb = 1
 def load_level(lvl_nmb):
+    loaded_level = []
     with open(f'levels/{lvl_nmb}.lvl', 'r') as file:
         lines = file.readlines()
         for line in lines:
@@ -42,15 +46,28 @@ def load_level(lvl_nmb):
             b = intyfi(r'b-(\d+)',line)
             dificalty = intyfi(r'd-(\d+)',line)
             e1 = stringyfi(r'e1-(\w)',line)
-            e2 = stringyfi(r'e2-(\w)',line)
-            e3 = stringyfi(r'e3-(\w)',line)
+            e2 = stringyfi(r'e2-(\w)',line) or e1
+            e3 = stringyfi(r'e3-(\w)',line) or e1
 
-            level.append([e1,e2,e3,r,g,b,dificalty,pice_time])
-load_level(1)
+            loaded_level.append([e1,e2,e3,r,g,b,dificalty,pice_time])
+    return loaded_level
 
-dic = {"r":elements.rect}
+level = load_level(level_nmb)
+
+dic = {"r":elements.rect, "c":elements.circle}
 class player():
     def __init__(self,lvl,numb = 0):
+        global level_nmb, won
+        if numb >= len(lvl):
+            elements.finish_screen(won,len(lvl),screen,pygame)
+            won = 0
+            level_nmb += 1
+            try:
+                lvl = load_level(level_nmb)
+            except FileNotFoundError:
+                level_nmb = 1
+                lvl = load_level(level_nmb)
+            numb = 0
         self.lvl = lvl
         self.numb = numb
         self.line = lvl[numb]
@@ -67,9 +84,15 @@ class player():
         self.__init__(self.lvl,numb=self.numb)
 
     def update(self,event):
-        global last_event_importent
+        global last_event_importent 
+        global won, level_nmb
+
         if self.slider.time <= 0:
             if event == self.imposter:
+                last_event_importent = None
+                won += 1
+                self.next_line()
+            else:
                 last_event_importent = None
                 self.next_line()
 
@@ -81,19 +104,25 @@ class player():
 #main menu loop
 running = True
 while running:
+
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             running = False
             
     screen.fill((0, 0, 0))
     #render things
-    screen.blit(text,(width/2-120,height/2-80))
+    angle = math.sin(time.time()) * 5
+    rotated_text = pygame.transform.rotate(text, angle)
+    text_rect = rotated_text.get_rect(center=(width / 2, height / 2 - 40))
+    screen.blit(rotated_text, text_rect)
     pygame.display.flip() 
 
 
 #game loop
 running = True
 line_nmb = 0
+won = 0
+lost = 0
 events = {pygame.K_a: 1, pygame.K_DOWN: 2,
           pygame.K_s: 2, pygame.K_LEFT: 1,
           pygame.K_d: 3, pygame.K_RIGHT: 3}

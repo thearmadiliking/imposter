@@ -58,3 +58,38 @@ class rect:
             self.pygame.draw.rect(self.screen,(80,80,200),(self.x-5,self.y-5,self.l+10,self.h+10))
         self.pygame.draw.rect(self.screen,self.rgb,(self.x,self.y,self.l,self.h))
 
+class circle:
+    def __init__(self,e,rgb,d,imposter,pygame,screen):
+        self.e = e
+        self.d = d
+        self.imposter = imposter
+        self.rgb = imposter_color(rgb,d) if self.imposter == self.e else rgb
+
+        self.pygame = pygame
+        self.screen = screen
+        self.r = (screen.get_width()-30)/3 - 10
+        if self.e == 1:
+            self.x = self.r * 0+ 20 + self.r/2
+        elif self.e == 2:
+            self.x = self.r * 1 + 30 + self.r/2
+        elif self.e == 3:
+            self.x = self.r * 2 + 40 + self.r/2
+        self.y = screen.get_height()/2
+
+
+    def update(self,event):
+        if event == self.e:
+            self.pygame.draw.circle(self.screen,(80,80,200),(int(self.x),int(self.y)),int(self.r/2)+5)
+        self.pygame.draw.circle(self.screen,self.rgb,(int(self.x),int(self.y)),int(self.r/2))
+
+def finish_screen(won, lost, screen, pygame):
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                running = False
+        font = pygame.font.SysFont("Comic Sans MS",85,bold=True,italic=True)
+        screen.fill((0,0,0))
+        text = font.render(f"{won}/{lost}", True, (230,10,15))
+        screen.blit(text,(screen.get_width()/2-120,screen.get_height()/2-80))
+        pygame.display.flip()
