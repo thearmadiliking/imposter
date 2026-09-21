@@ -100,7 +100,6 @@ class player():
         self.e1.update(last_event_importent)
         self.e2.update(last_event_importent)
         self.e3.update(last_event_importent)
-
 #main menu loop
 running = True
 while running:
