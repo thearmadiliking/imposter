@@ -82,14 +82,62 @@ class circle:
             self.pygame.draw.circle(self.screen,(80,80,200),(int(self.x),int(self.y)),int(self.r/2)+5)
         self.pygame.draw.circle(self.screen,self.rgb,(int(self.x),int(self.y)),int(self.r/2))
 
-def finish_screen(won, lost, screen, pygame):
+
+main = (0,0,0)
+second = (255,255,255)
+
+def lvl_picker(lvls,colors,secenderys, screen, pygame):
     running = True
+    numb = 0
+
+    global main, second
+    main = colors[numb]
+    second = secenderys[numb]
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    numb -= 1
+                    if numb < 0:
+                        numb = len(lvls)-1
+                elif event.key == pygame.K_RIGHT:
+                    numb += 1
+                    if numb >= len(lvls):
+                        numb = 0
+
+        main = colors[numb]
+        second = secenderys[numb]
+        screen.fill(colors[numb])
+        font = pygame.font.SysFont("Comic Sans MS",100,bold=True,italic=True)
+        text = font.render(f"{lvls[numb]}", True, secenderys[numb])
+        text_rect = text.get_rect(center=(screen.get_width()/2, screen.get_height()/2))
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+    
+
+
+def finish_screen(won, lost, screen, pygame, math):
+    running = True
+
+    x = screen.get_width()/2-50
+    y = screen.get_height()/2-50 + math.sin(time.time()) * 5
+    #rotate text
+    r = math.sin(time.time()) * 5
+    font = pygame.font.SysFont("Comic Sans MS",100,bold=True,italic=True)
+    text = font.render(f"{won}/{lost}", True, second)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 running = False
-        font = pygame.font.SysFont("Comic Sans MS",85,bold=True,italic=True)
-        screen.fill((0,0,0))
-        text = font.render(f"{won}/{lost}", True, (230,10,15))
-        screen.blit(text,(screen.get_width()/2-120,screen.get_height()/2-80))
+        x = screen.get_width()/2-50
+        y = screen.get_height()/2-50 + math.sin(time.time()) * 5
+        r = math.sin(time.time()) * 5
+        rotated_text = pygame.transform.rotate(text, r)
+        screen.fill(main)
+        screen.blit(rotated_text,(x,y))
         pygame.display.flip()

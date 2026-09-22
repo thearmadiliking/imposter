@@ -3,6 +3,7 @@ import elements
 import re
 import math
 import time
+import os
 
 pygame.init()
 
@@ -31,7 +32,34 @@ def stringyfi(not_int,line):
 def floatyfi(pattern, line):
     return float(re.findall(pattern, line)[0])
 
+def parse_color(line, name):
+    match = re.search(rf'{name}-\(([^)]+)\)', line)
+    if not match:
+        return None
+    values = [int(part.strip()) for part in match.group(1).split(',')]
+    return tuple(values)
 
+#read levels
+def read_levels():
+    lvls = []
+    colors = []
+    secenderys = []
+
+    for filename in os.listdir('levels'):
+        if filename.endswith('.lvl'):
+            with open(os.path.join('levels', filename), 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    main_color = parse_color(line, 'main')
+                    second_color = parse_color(line, 'second')
+                    if main_color is None or second_color is None:
+                        continue
+                    lvls.append(filename[:-4])
+                    colors.append(main_color)
+                    secenderys.append(second_color)
+    return lvls, colors, secenderys
+
+lvls, colors, secenderys = read_levels()
 
 #level player
 level_nmb = 1
@@ -40,6 +68,8 @@ def load_level(lvl_nmb):
     with open(f'levels/{lvl_nmb}.lvl', 'r') as file:
         lines = file.readlines()
         for line in lines:
+            main_color = parse_color(line, 'main')
+            second_color = parse_color(line, 'second')
             pice_time = floatyfi(r'\d+(?:\.\d+)?',line)
             r = intyfi(r'r-(\d+)',line)
             g = intyfi(r'g-(\d+)',line)
@@ -59,7 +89,7 @@ class player():
     def __init__(self,lvl,numb = 0):
         global level_nmb, won
         if numb >= len(lvl):
-            elements.finish_screen(won,len(lvl),screen,pygame)
+            elements.finish_screen(won,len(lvl),screen,pygame,math)
             won = 0
             level_nmb += 1
             try:
@@ -116,6 +146,7 @@ while running:
     screen.blit(rotated_text, text_rect)
     pygame.display.flip() 
 
+elements.lvl_picker(lvls,colors,secenderys,screen,pygame)
 
 #game loop
 running = True

@@ -21,7 +21,7 @@ depending on the flavor the steps mit be a bit difrent.
 you will need to install `python` and `pygame`
 run `git clone https://github.com/thearmadiliking/imposter`
 
-## linux :(
+## windows :(
 
 you will need to install `python` and `pygame`
 run `git clone https://github.com/thearmadiliking/imposter`
