@@ -4,22 +4,31 @@ import re
 import math
 import time
 import os
+from pygame import mixer
+import tutorial
 
+#setup pygame-mixer to play the main theam song
 pygame.init()
+mixer.init()
 
+mixer.music.load("track/main.mp3")
+mixer.music.play(-1)
+mixer.music.set_volume(1)
+
+#set the max fps for consistent speeds
+clock = pygame.time.Clock()
+clock.tick(60)
+
+#window setings
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('imposter')
 
-font = pygame.font.SysFont(
-    "Comic Sans MS",
-    85,
-    bold=True,
-    italic=True
-)
+#loading the text
 text = pygame.image.load("imposter.png")
 text = pygame.transform.scale(text, (400, 80))
 
+#Function for formating the data from the .lvl files
 def intyfi(not_int,line):
     return int(str(re.findall(not_int,line)[0]))
 
@@ -46,8 +55,10 @@ def read_levels():
     secenderys = []
 
     for filename in os.listdir('levels'):
+        #filter the lvl files from the uther files
         if filename.endswith('.lvl'):
             with open(os.path.join('levels', filename), 'r') as file:
+                #read the files 
                 lines = file.readlines()
                 for line in lines:
                     main_color = parse_color(line, 'main')
@@ -63,13 +74,12 @@ lvls, colors, secenderys = read_levels()
 
 #level player
 level_nmb = 1
-def load_level(lvl_nmb):
+def load_level(lvl_nmb,lvls):
     loaded_level = []
-    with open(f'levels/{lvl_nmb}.lvl', 'r') as file:
+    with open(f'levels/{lvls[lvl_nmb]}.lvl', 'r') as file:
         lines = file.readlines()
         for line in lines:
-            main_color = parse_color(line, 'main')
-            second_color = parse_color(line, 'second')
+
             pice_time = floatyfi(r'\d+(?:\.\d+)?',line)
             r = intyfi(r'r-(\d+)',line)
             g = intyfi(r'g-(\d+)',line)
@@ -82,26 +92,20 @@ def load_level(lvl_nmb):
             loaded_level.append([e1,e2,e3,r,g,b,dificalty,pice_time])
     return loaded_level
 
-level = load_level(level_nmb)
-
 dic = {"r":elements.rect, "c":elements.circle}
+
+#this is the main level player 
 class player():
     def __init__(self,lvl,numb = 0):
         global level_nmb, won
         if numb >= len(lvl):
             elements.finish_screen(won,len(lvl),screen,pygame,math)
             won = 0
-            level_nmb += 1
-            try:
-                lvl = load_level(level_nmb)
-            except FileNotFoundError:
-                level_nmb = 1
-                lvl = load_level(level_nmb)
+            lvl = load_level(elements.lvl_picker(lvls,colors,secenderys,screen,pygame),lvls)
             numb = 0
         self.lvl = lvl
         self.numb = numb
         self.line = lvl[numb]
-        print(lvl[numb])
         self.imposter = elements.random.randint(1,3)
         self.e1 = dic[self.line[0]](1,(self.line[3],self.line[4],self.line[5]),self.line[6],self.imposter,pygame,screen)
         self.e2 = dic[self.line[0]](2,(self.line[3],self.line[4],self.line[5]),self.line[6],self.imposter,pygame,screen)
@@ -110,7 +114,6 @@ class player():
 
     def next_line(self):
         self.numb += 1
-        print(self.numb)
         self.__init__(self.lvl,numb=self.numb)
 
     def update(self,event):
@@ -130,6 +133,7 @@ class player():
         self.e1.update(last_event_importent)
         self.e2.update(last_event_importent)
         self.e3.update(last_event_importent)
+
 #main menu loop
 running = True
 while running:
@@ -145,8 +149,15 @@ while running:
     text_rect = rotated_text.get_rect(center=(width / 2, height / 2 - 40))
     screen.blit(rotated_text, text_rect)
     pygame.display.flip() 
+mixer.quit()
+mixer.init()
+#mixer.music.load("track/totorial.mp3")
+#mixer.music.play(1)
+#mixer.music.set_volume(1)
+tutorial.run(pygame,screen,time,elements)
 
-elements.lvl_picker(lvls,colors,secenderys,screen,pygame)
+level_nmb = elements.lvl_picker(lvls,colors,secenderys,screen,pygame)
+level = load_level(level_nmb,lvls)
 
 #game loop
 running = True

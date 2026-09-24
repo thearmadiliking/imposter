@@ -19,11 +19,11 @@ def install():
         inp = input(">")
 
         if inp == "1":
-            os.system(f"pip install pygame re")
+            os.system(f"sudo pip install pygame re")
         elif inp == "2":
-            os.system(f"pacmen -S python-pygame python-re")
+            os.system(f"sudo pacman -S python-pygame")
         elif inp == "3":
-            os.system(f"dnf install python3-pygame python3-re")
+            os.system(f"sudo dnf install python3-pygame")
         else:
             do_it_yourself()
 

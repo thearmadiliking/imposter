@@ -44,6 +44,7 @@ class rect:
         self.screen = screen
         self.l = (screen.get_width()-30)/3 - 10
         self.h = screen.get_height() - 150
+        print(self.l,self.h)
         if self.e == 1:
             self.x = self.l * 0+ 20
         elif self.e == 2:
@@ -96,6 +97,9 @@ def lvl_picker(lvls,colors,secenderys, screen, pygame):
 
     while running:
         for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return numb
+
             if event.type == pygame.QUIT:
                 running = False
             
@@ -108,13 +112,16 @@ def lvl_picker(lvls,colors,secenderys, screen, pygame):
                     numb += 1
                     if numb >= len(lvls):
                         numb = 0
+                elif event.key == pygame.K_KP_ENTER:
+                    return numb
+
 
         main = colors[numb]
         second = secenderys[numb]
         screen.fill(colors[numb])
         font = pygame.font.SysFont("Comic Sans MS",100,bold=True,italic=True)
         text = font.render(f"{lvls[numb]}", True, secenderys[numb])
-        text_rect = text.get_rect(center=(screen.get_width()/2, screen.get_height()/2))
+        text_rect = text.get_rect(center=(screen.get_width()/2, screen.get_height()/2-30))
         screen.blit(text, text_rect)
         pygame.display.flip()
     
@@ -134,7 +141,7 @@ def finish_screen(won, lost, screen, pygame, math):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 running = False
-        x = screen.get_width()/2-50
+        x = screen.get_width()/2-120
         y = screen.get_height()/2-50 + math.sin(time.time()) * 5
         r = math.sin(time.time()) * 5
         rotated_text = pygame.transform.rotate(text, r)
