@@ -1,0 +1,101 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pygame pyinstaller pillow
+
+      - name: Build exe
+        run: >
+          pyinstaller --onefile --noconsole --name imposter
+          --icon logo.png
+          --add-data "img;img"
+          --add-data "levels;levels"
+          --add-data "track;track"
+          --add-data "imposter.png;."
+          main.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          path: dist/imposter.exe
+
+  linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pygame pyinstaller
+
+      - name: Build binary
+        run: >
+          pyinstaller --onefile --name imposter
+          --add-data "img:img"
+          --add-data "levels:levels"
+          --add-data "track:track"
+          --add-data "imposter.png:."
+          main.py
+
+      - name: Build AppImage
+        run: |
+          mkdir -p AppDir/usr/bin
+          cp dist/imposter AppDir/usr/bin/imposter
+          cp logo.png AppDir/imposter.png
+
+          cat > AppDir/imposter.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Imposter
+          Exec=imposter
+          Icon=imposter
+          Categories=Game;
+          EOF
+
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/sh
+          HERE="$(dirname "$(readlink -f "$0")")"
+          exec "$HERE/usr/bin/imposter" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir Imposter-x86_64.AppImage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appimage
+          path: Imposter-x86_64.AppImage
+
+  release:
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
