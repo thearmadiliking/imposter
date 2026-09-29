@@ -1,9 +1,11 @@
+import os, sys
+if getattr(sys, "frozen", False):
+    os.chdir(sys._MEIPASS)  # folder where PyInstaller unpacks bundled files
 import pygame
 import elements
 import re
 import math
 import time
-import os
 from pygame import mixer
 import tutorial
 
@@ -48,7 +50,7 @@ def parse_color(line, name):
     values = [int(part.strip()) for part in match.group(1).split(',')]
     return tuple(values)
 
-#read levels
+#read the levels
 def read_levels():
     lvls = []
     colors = []
@@ -154,12 +156,13 @@ mixer.init()
 #mixer.music.load("track/totorial.mp3")
 #mixer.music.play(1)
 #mixer.music.set_volume(1)
+#run the tutorial
 tutorial.run(pygame,screen,time,elements)
 
 level_nmb = elements.lvl_picker(lvls,colors,secenderys,screen,pygame)
 level = load_level(level_nmb,lvls)
 
-#game loop
+#this is the game loop
 running = True
 line_nmb = 0
 won = 0
@@ -178,7 +181,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key in events:
+            if event.key in events: 
                 last_event_importent = events[event.key]
 
     screen.fill((0, 0, 0))
